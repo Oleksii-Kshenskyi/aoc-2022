@@ -68,6 +68,8 @@ namespace util {
                 return *std::max_element(this->_vec.begin(), this->_vec.end());
             }
 
+            T at(size_t index) { return this->_vec[index]; }
+
         private:
             std::vector<T> _vec;
     };
