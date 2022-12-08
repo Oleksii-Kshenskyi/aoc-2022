@@ -48,6 +48,15 @@ class Game {
             }
             return score;
         }
+        uint64_t play2() {
+            uint64_t score = 0;
+            for(const auto& round: this->_scenario) {
+                Choice actual = Game::true_choice(round);
+                score += this->_choice_score[actual];
+                score += this->winloss_score(std::make_pair(round.first, actual));
+            }
+            return score;
+        }
     private:
         std::unordered_map<std::string, Choice> _transformation;
         std::unordered_map<Choice, uint64_t> _choice_score;
@@ -65,6 +74,19 @@ class Game {
             else if(round.first == Choice::Scissors && round.second == Choice::Scissors) return 3;
             else throw "Game::winloss_score(): UNKNOWN GAME!";
         }
+
+        static Choice true_choice(const std::pair<Choice, Choice>& winloss) {
+            if(winloss.first == Choice::Rock && winloss.second == Choice::Rock) return Choice::Scissors;
+            else if(winloss.first == Choice::Rock && winloss.second == Choice::Paper) return Choice::Rock;
+            else if(winloss.first == Choice::Rock && winloss.second == Choice::Scissors) return Choice::Paper;
+            else if(winloss.first == Choice::Paper && winloss.second == Choice::Rock) return Choice::Rock;
+            else if(winloss.first == Choice::Paper && winloss.second == Choice::Paper) return Choice::Paper;
+            else if(winloss.first == Choice::Paper && winloss.second == Choice::Scissors) return Choice::Scissors;
+            else if(winloss.first == Choice::Scissors && winloss.second == Choice::Rock) return Choice::Paper;
+            else if(winloss.first == Choice::Scissors && winloss.second == Choice::Paper) return Choice::Scissors;
+            else if(winloss.first == Choice::Scissors && winloss.second == Choice::Scissors) return Choice::Rock;
+            else throw "Game::true_choice(): UNKNOWN GAME!";
+        }
 };
 
 uint64_t part_one(IT type, uint16_t day) {
@@ -72,8 +94,7 @@ uint64_t part_one(IT type, uint16_t day) {
 }
 
 uint64_t part_two(IT type, uint16_t day) {
-    (void) type;
-    return day;
+    return Game(type, day).play2();
 }
 
 int main() {
