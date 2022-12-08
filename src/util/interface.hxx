@@ -72,6 +72,8 @@ namespace util {
                     }
                 }
 
+                if(constructing && !worker.empty()) result.add(std::move(worker));
+
                 return result;
             }
             // std::vector<uint64_t> uints() {}

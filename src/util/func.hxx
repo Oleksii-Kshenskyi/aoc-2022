@@ -20,7 +20,13 @@ namespace util {
             VectorPipe<T>& copy_add(const T& copied_elem) {
                 this->_vec.push_back(copied_elem);
                 return *this;
+            
             }
+            VectorPipe<T>& sort_descending() {
+                std::sort(this->_vec.begin(), this->_vec.end(), std::greater<T>());
+                return *this;
+            }
+
             void show() {
                 for(const auto& item: this->_vec)
                     std::cout << item << "\n";
@@ -28,6 +34,7 @@ namespace util {
 
             std::vector<T> to_vec() { return this->_vec; }
             bool empty() { return this->_vec.empty(); }
+            size_t size() { return this->_vec.size(); }
             VectorPipe<T>& clear() {
                 this->_vec.clear();
                 return *this;
@@ -39,6 +46,9 @@ namespace util {
                 for(const auto& item: _vec)
                     result.copy_add(f(item));
                 return result;
+            }
+            VectorPipe<T> take(uint64_t how_many) {
+                return VectorPipe<T>(std::vector<T>(this->_vec.begin(), this->_vec.begin() + how_many));
             }
 
             T reduce(const std::function<T(T, T)>& f, T init_value) {
