@@ -21,7 +21,7 @@ class Range {
 
 class RangePairs {
     public:
-        RangePairs(VectorPipe<std::string>& input) {
+        RangePairs(VectorPipe<std::string>&& input) {
             for(auto& line: input.to_vec()) {
                 std::regex range_rgx { "^(\\d+)\\-(\\d+),(\\d+)\\-(\\d+)$" };
                 std::smatch matches;
@@ -42,22 +42,31 @@ class RangePairs {
                               pair.first.to() <= pair.second.to());
                 });
         }
+
+        uint64_t overlapping_pairs() {
+            return this->_ranges
+                .count([](auto& pair)
+                    { return !((pair.first.from() > pair.second.from() &&
+                                pair.first.from() > pair.second.to()) ||
+                               (pair.first.to() < pair.second.from() &&
+                                pair.first.to() < pair.second.to())); }
+                );
+        }
     private:
         VectorPipe<std::pair<Range, Range>> _ranges;
 };
 
-uint64_t part_one(VectorPipe<std::string>& input) {
-    return RangePairs(input).inclusive_pairs();
+uint64_t part_one(RangePairs& input) {
+    return input.inclusive_pairs();
 }
 
-uint64_t part_two(VectorPipe<std::string>& input) {
-    (void) input;
-    return 0;
+uint64_t part_two(RangePairs& input) {
+    return input.overlapping_pairs();
 }
 
 int main() {
     if(util::Input::exists(IT::SampleInput, 4)) {
-        VectorPipe<std::string> input = util::Input(IT::SampleInput, 4).lines();
+        RangePairs input { util::Input(IT::SampleInput, 4).lines() };
         util::show_result(IT::SampleInput, 2022, 4, 1, part_one(input));
         util::show_result(IT::SampleInput, 2022, 4, 2, part_two(input));
     } else {
@@ -65,7 +74,7 @@ int main() {
     }
 
     if(util::Input::exists(IT::PuzzleInput, 4)) {
-        VectorPipe<std::string> input = util::Input(IT::PuzzleInput, 4).lines();
+        RangePairs input { util::Input(IT::PuzzleInput, 4).lines() };
         util::show_result(IT::PuzzleInput, 2022, 4, 1, part_one(input));
         util::show_result(IT::PuzzleInput, 2022, 4, 2, part_two(input));
     } else {
