@@ -52,6 +52,10 @@ namespace util {
             VectorPipe<T> take(uint64_t how_many) {
                 return VectorPipe<T>(std::vector<T>(this->_vec.begin(), this->_vec.begin() + how_many));
             }
+            VectorPipe<T> subvec(size_t begin, size_t end) {
+                size_t end_offset = this->_vec.size() - end - 1;
+                return VectorPipe<T>(std::vector<T>(this->_vec.begin() + begin, this->_vec.end() - end_offset));
+            }
             VectorPipe<VectorPipe<T>> partition(size_t part_size) {
                 VectorPipe<VectorPipe<T>> result;
 
