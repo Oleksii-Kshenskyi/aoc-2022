@@ -50,6 +50,21 @@ namespace util {
             VectorPipe<T> take(uint64_t how_many) {
                 return VectorPipe<T>(std::vector<T>(this->_vec.begin(), this->_vec.begin() + how_many));
             }
+            VectorPipe<VectorPipe<T>> partition(size_t part_size) {
+                VectorPipe<VectorPipe<T>> result;
+
+                VectorPipe<T> group;
+                for(size_t index = 0; index < this->_vec.size(); index++) {
+                    group.copy_add(this->_vec[index]);
+
+                    if(group.size() == part_size || index == this->_vec.size() - 1) {
+                        result.add(std::move(group));
+                        group.clear();
+                    }
+                }
+
+                return result;
+            }
 
             T reduce(const std::function<T(T, T)>& f, T init_value) {
                 T acc = init_value;

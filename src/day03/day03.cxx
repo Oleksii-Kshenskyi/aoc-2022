@@ -42,9 +42,54 @@ uint64_t part_one(VectorPipe<std::string>& input) {
     return code_sum(result);
 }
 
+char one_char_group(VectorPipe<std::string>& group) {
+    uint16_t ool = 1;
+    uint16_t olo = 2;
+    uint16_t loo = 4;
+    std::unordered_map<char, uint16_t> freqs;
+
+    std::function<size_t(std::string)> sizef = [=](auto s) { return s.size(); };
+    auto size_vec = group.map(sizef).to_vec();
+    size_t max_size = *std::max_element(size_vec.begin(), size_vec.end());
+
+    for(size_t index = 0; index < max_size; index++) {
+        auto one_found = freqs.end();
+        auto two_found = freqs.end();
+        auto three_found = freqs.end();
+
+        if(index < group.at(0).size()) {
+            one_found = freqs.find(group.at(0)[index]);
+            if(one_found == freqs.end()) freqs[group.at(0)[index]] = ool;
+            else freqs[group.at(0)[index]] = freqs[group.at(0)[index]] | ool;
+        }
+
+        if(index < group.at(1).size()) {
+            two_found = freqs.find(group.at(1)[index]);
+            if(two_found == freqs.end()) freqs[group.at(1)[index]] = olo;
+            else freqs[group.at(1)[index]] = freqs[group.at(1)[index]] | olo;
+        }
+
+        if(index < group.at(2).size()) {
+            three_found = freqs.find(group.at(2)[index]);
+            if(three_found == freqs.end()) freqs[group.at(2)[index]] = loo;
+            else freqs[group.at(2)[index]] = freqs[group.at(2)[index]] | loo;
+        }
+    }
+
+    for(auto item: freqs) {
+        if(item.second == 0b111) { return item.first; }
+    }
+
+    std::cout << "Day 3, one_char_group(): No matches found..." << std::endl;
+    throw "one_char_group()";
+}
 uint64_t part_two(VectorPipe<std::string>& input) {
-    (void) input;
-    return 1;
+    std::string result;
+    for(auto& group: input.partition(3).to_vec()) {
+        char ocg = one_char_group(group);
+        result += ocg;
+    }
+    return code_sum(result);
 }
 
 int main() {
