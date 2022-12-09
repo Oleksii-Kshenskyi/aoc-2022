@@ -29,5 +29,10 @@ set_target_properties(three
                         PROPERTIES
                             CXX_STANDARD 20
                             CXX_STANDARD_REQUIRED On)
+add_executable(four ${SRC}/day04/day04.cxx)
+set_target_properties(four
+                        PROPERTIES
+                            CXX_STANDARD 20
+                            CXX_STANDARD_REQUIRED On)
 
 add_compile_definitions(INPUTS_PATH="${CMAKE_SOURCE_DIR}/inputs")
