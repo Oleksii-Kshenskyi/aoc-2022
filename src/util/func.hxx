@@ -39,6 +39,8 @@ namespace util {
                 this->_vec.clear();
                 return *this;
             }
+            T& last() { return this->_vec.back(); }
+            T& first() {return this-> vec.first(); }
 
             template<typename N>
             VectorPipe<N> map(const std::function<N(T)>& f) {
@@ -64,6 +66,11 @@ namespace util {
                 }
 
                 return result;
+            }
+
+            template <typename F>
+            uint64_t count(const F& f) {
+                return std::count_if(this->_vec.begin(), this->_vec.end(), f);
             }
 
             T reduce(const std::function<T(T, T)>& f, T init_value) {
