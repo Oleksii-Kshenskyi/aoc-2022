@@ -33,6 +33,16 @@ class Crates {
                 this->move_crate(from, to);
             return *this;
         }
+        Crates& move_stack2(uint16_t quantity, uint16_t from, uint16_t to) {
+            auto start = this->_crates[from].end() - quantity;
+            auto end = this->_crates[from].end();
+            auto start_index = this->_crates[from].size() - quantity;
+            std::string moved_stack = this->_crates[from].substr(start_index, quantity);
+            this->_crates[from].erase(start, end);
+            this->_crates[to] += moved_stack;
+
+            return *this;
+        }
         Crates& move_crate(uint16_t from, uint16_t to) {
             char crate = this->_crates[from].back();
             this->_crates[from].pop_back();
@@ -95,6 +105,9 @@ class Game {
 
         std::string run() {
             return this->execute_instructions().message();
+        }
+        std::string run2() {
+            return this->execute_instructions2().message();
         }
 
         Game& show_instructions() {
@@ -167,6 +180,12 @@ class Game {
             }
             return *this;
         }
+        Game& execute_instructions2() {
+            for(auto& instr: this->_instructions.vec()) {
+                this->_crates.move_stack2(instr.quantity, instr.from, instr.to);
+            }
+            return *this;
+        }
 
         std::string message() {
             return this->_crates.top_message();
@@ -179,8 +198,7 @@ std::string part_one(VectorPipe<std::string>& input) {
 }
 
 std::string part_two(VectorPipe<std::string>& input) {
-    (void) input;
-    return "KEKW";
+    return Game(input).run2();
 }
 
 int main() {
