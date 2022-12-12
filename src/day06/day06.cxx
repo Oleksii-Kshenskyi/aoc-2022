@@ -11,19 +11,29 @@ using util::VectorPipe;
 using util::StringPipe;
 
 
-uint64_t part_one(VectorPipe<std::string>& input) {
-    (void) input;
-    return 420;
+uint64_t part_one(std::string& input) {
+    uint16_t result = 0;
+    for(uint16_t window_start = 0; window_start < input.size() - 4; window_start++) {
+        std::string window = input.substr(window_start, 4);
+        std::sort(window.begin(), window.end());
+        if((std::unique(window.begin(), window.end())) == window.end()) {
+            return result + 4;
+        } else {
+            result++;
+        }
+    }
+
+    return result;
 }
 
-uint64_t part_two(VectorPipe<std::string>& input) {
-    (void) input;
-    return 69;
+uint64_t part_two(std::string& input) {
+    uint16_t result = input.size(); 
+    return result;
 }
 
 int main() {
     if(util::Input::exists(IT::SampleInput, 6)) {
-        auto input = util::Input(IT::SampleInput, 6).lines();
+        auto input = util::Input(IT::SampleInput, 6).str().to_string();
         util::show_result(IT::SampleInput, 2022, 6, 1, part_one(input));
         util::show_result(IT::SampleInput, 2022, 6, 2, part_two(input));
     } else {
@@ -31,7 +41,7 @@ int main() {
     }
 
     if(util::Input::exists(IT::PuzzleInput, 6)) {
-        auto input = util::Input(IT::PuzzleInput, 6).lines();
+        auto input = util::Input(IT::PuzzleInput, 6).str().to_string();
         util::show_result(IT::PuzzleInput, 2022, 6, 1, part_one(input));
         util::show_result(IT::PuzzleInput, 2022, 6, 2, part_two(input));
     } else {
