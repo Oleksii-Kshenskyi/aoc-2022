@@ -28,6 +28,24 @@ class Crates {
             std::cout << "===END CRATES===" << std::endl << std::endl; 
         }
         size_t size() { return _crates.size(); }
+        Crates& move_stack(uint16_t quantity, uint16_t from, uint16_t to) {
+            for(uint16_t time = 0; time < quantity; time++)
+                this->move_crate(from, to);
+            return *this;
+        }
+        Crates& move_crate(uint16_t from, uint16_t to) {
+            char crate = this->_crates[from].back();
+            this->_crates[from].pop_back();
+            this->_crates[to].push_back(crate);
+            return *this;
+        }
+        std::string top_message() {
+            std::string message = "";
+            for(auto& stack: this->_crates) {
+                message += stack.back();
+            }
+            return message;
+        }
     private:
         std::vector<std::string> _crates;
 };
@@ -58,6 +76,7 @@ class Instructions {
             std::cout << "===END INSTRUCTIONS===" << std::endl;
         }
         size_t size() { return _instructions.size(); }
+        std::vector<Instruction>& vec() { return this->_instructions; }
     private:
         std::vector<Instruction> _instructions;
 };
@@ -72,6 +91,10 @@ class Game {
             size_t columns_count = this->get_columns_count();
             this->parse_crates(raw_crates, columns_count);
             this->parse_instructions(raw_instructions);
+        }
+
+        std::string run() {
+            return this->execute_instructions().message();
         }
 
         Game& show_instructions() {
@@ -109,7 +132,6 @@ class Game {
             return result;
         }
 
-        // TODO: Only the number of columns is fixed, the number of rows can be arbitrary
         void parse_crates(VectorPipe<std::string>& raw, uint16_t columns_count) {
             auto raw_vec = raw.to_vec();
             this->_crates.set_size(columns_count);
@@ -138,17 +160,27 @@ class Game {
         uint16_t get_columns_count() {
             return this->_labels_map.size();
         }
+
+        Game& execute_instructions() {
+            for(auto& instr: this->_instructions.vec()) {
+                this->_crates.move_stack(instr.quantity, instr.from, instr.to);
+            }
+            return *this;
+        }
+
+        std::string message() {
+            return this->_crates.top_message();
+        }
 };
 
 
-uint64_t part_one(VectorPipe<std::string>& input) {
-    Game(input).show_crates();
-    return 69;
+std::string part_one(VectorPipe<std::string>& input) {
+    return Game(input).run();
 }
 
-uint64_t part_two(VectorPipe<std::string>& input) {
+std::string part_two(VectorPipe<std::string>& input) {
     (void) input;
-    return 69;
+    return "KEKW";
 }
 
 int main() {
