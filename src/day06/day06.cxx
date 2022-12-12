@@ -10,14 +10,13 @@
 using util::VectorPipe;
 using util::StringPipe;
 
-
-uint64_t part_one(std::string& input) {
+uint64_t first_unique(std::string& input, uint16_t window_size) {
     uint16_t result = 0;
-    for(uint16_t window_start = 0; window_start < input.size() - 4; window_start++) {
-        std::string window = input.substr(window_start, 4);
+    for(uint16_t window_start = 0; window_start < input.size() - window_size; window_start++) {
+        std::string window = input.substr(window_start, window_size);
         std::sort(window.begin(), window.end());
         if((std::unique(window.begin(), window.end())) == window.end()) {
-            return result + 4;
+            return result + window_size;
         } else {
             result++;
         }
@@ -26,9 +25,12 @@ uint64_t part_one(std::string& input) {
     return result;
 }
 
+uint64_t part_one(std::string& input) {
+    return first_unique(input, 4);
+}
+
 uint64_t part_two(std::string& input) {
-    uint16_t result = input.size(); 
-    return result;
+    return first_unique(input, 14);
 }
 
 int main() {
