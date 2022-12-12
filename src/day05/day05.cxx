@@ -14,26 +14,22 @@ class Crates {
     public:
         Crates(): _crates() {}
         void set_size(size_t size) {
-            for(size_t index = 0; index < size; index++) {
-                std::vector<char> row(size, 0);
-                this->_crates.push_back(row);
-            }
+            this->_crates.resize(size);
         }
-        void set_crate(size_t row, size_t column, char crate) {
-            this->_crates[row][column] = crate;
+        void push_crate(size_t row, char crate) {
+            if (this->_crates.size() <= row) this->_crates.reserve(row * 2);
+            this->_crates[row].push_back(crate);
         }
         void show() {
             std::cout << "===CRATES===" << std::endl << std::endl;
             for(size_t row_index = 0; row_index < this->_crates.size(); row_index++) {
-                for(size_t column_index = 0; column_index < this->_crates[0].size(); column_index++) {
-                    std::cout << this->_crates[row_index][column_index] << " ";
-                }
-                std::cout << std::endl;
+                std::cout << "ROW " << row_index << ": " << this->_crates[row_index] << std::endl;
             }
             std::cout << "===END CRATES===" << std::endl << std::endl; 
         }
+        size_t size() { return _crates.size(); }
     private:
-        std::vector<std::vector<char>> _crates;
+        std::vector<std::string> _crates;
 };
 
 struct Instruction {
@@ -61,6 +57,7 @@ class Instructions {
             }
             std::cout << "===END INSTRUCTIONS===" << std::endl;
         }
+        size_t size() { return _instructions.size(); }
     private:
         std::vector<Instruction> _instructions;
 };
@@ -71,8 +68,9 @@ class Game {
             VectorPipe<std::string> raw_crates { this->raw_crates(input) };
             std::string labels { input.at(raw_crates.size()) };
             this->_labels_map = this->produce_labels_map(labels);
-            VectorPipe<std::string> raw_instructions { this->raw_instructions(input, raw_crates.size() + 1) };
-            this->parse_crates(raw_crates);
+            VectorPipe<std::string> raw_instructions { this->raw_instructions(input, raw_crates.size() + 2) };
+            size_t columns_count = this->get_columns_count();
+            this->parse_crates(raw_crates, columns_count);
             this->parse_instructions(raw_instructions);
         }
 
@@ -92,13 +90,15 @@ class Game {
         std::vector<std::string> raw_crates(VectorPipe<std::string>& input) {
             std::vector<std::string> result;
             for(auto& line: input.to_vec()) {
-                if(line[0] != '[') break;
+                char nospace = line[line.find_first_not_of(" ")];
+                if(nospace != '[') break;
                 result.push_back(line);
             }
+
             return result;
         }
         VectorPipe<std::string> raw_instructions(VectorPipe<std::string>& input, size_t offset) {
-            return input.subvec(offset, input.size());
+            return input.subvec(offset, input.size() - 1);
         }
 
         std::unordered_map<uint16_t, uint16_t> produce_labels_map(std::string& raw) {
@@ -109,15 +109,15 @@ class Game {
             return result;
         }
 
-        void parse_crates(VectorPipe<std::string>& raw) {
-            this->_crates.set_size(raw.size());
+        // TODO: Only the number of columns is fixed, the number of rows can be arbitrary
+        void parse_crates(VectorPipe<std::string>& raw, uint16_t columns_count) {
             auto raw_vec = raw.to_vec();
-            for(size_t row_index = 0; row_index < raw_vec.size(); row_index++) {
-                for(size_t index = 0; index < raw_vec[row_index].size(); index++) {
-                    if(std::isalpha(raw_vec[row_index][index])) {
-                        size_t crate_row = row_index;
-                        size_t crate_col = this->_labels_map[index];
-                        this->_crates.set_crate(crate_row, crate_col, raw_vec[row_index][index]);
+            this->_crates.set_size(columns_count);
+            for(int64_t row_index = raw_vec.size() - 1; row_index >= 0; row_index--) {
+                for(uint16_t col_index = 0; col_index < raw_vec[0].size(); col_index++) {
+                    if(std::isalpha(raw_vec[row_index][col_index])) {
+                        auto col = this->_labels_map[col_index];
+                        this->_crates.push_crate(col, raw_vec[row_index][col_index]);
                     }
                 }
             }
@@ -134,11 +134,15 @@ class Game {
                                                     static_cast<uint16_t>(stoul(matches[3]))));
             }
         }
+
+        uint16_t get_columns_count() {
+            return this->_labels_map.size();
+        }
 };
 
 
 uint64_t part_one(VectorPipe<std::string>& input) {
-    Game(input).show_crates().show_instructions();
+    Game(input).show_crates();
     return 69;
 }
 
