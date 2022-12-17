@@ -29,6 +29,10 @@ class Path {
                 this->_dir_path = "/";
                 return *this;
             }
+            if(this->_dir_path == "/") {
+                this->_dir_path += folder;
+                return *this;
+            }
             this->_dir_path += std::string("/") + folder;
             return *this;
         }
@@ -56,6 +60,7 @@ class Path {
                 if(this->_dir_path[index] == '/') result[level] = index;
                 level++;
             }
+            result[level] = this->_dir_path.size();
             return result;
         }
 };
@@ -81,12 +86,19 @@ class FileNode {
         }
 
         FileNode& seek(Path& seek_path) {
-            FileNode& found = *this;
-            for(uint16_t cur_level = 0; cur_level <= seek_path.max_level(); cur_level++) {
+            FileNode* found = this;
+            if(seek_path.path() == "/") return *found;
+            for(uint16_t cur_level = 1; cur_level <= seek_path.max_level(); cur_level++) {
                 std::string looking_for_name = seek_path.level(cur_level);
-                found = *std::find_if(this->children.begin(), this->children.end(), [=](auto& c){ return c.name == looking_for_name; });
+                if(found != nullptr) {
+                    auto found_it = std::find_if(found->children.begin(), found->children.end(), [=](auto& c){ return c.name == looking_for_name; });
+                    if(found_it != found->children.end()) found = &(*found_it);
+                }
             }
-            return found;
+            if(found == nullptr) {
+                std::cout << "WARNING: seek for path '" << seek_path.path() << "' resulted in nullptr." << std::endl;
+            }
+            return *found;
         }
 
 
@@ -129,8 +141,6 @@ class Computer {
                     add_here.add_file(line_split);
                 }
             }
-
-            this->_fs.root.ls();
         }
     private:
         FileSystem _fs;
