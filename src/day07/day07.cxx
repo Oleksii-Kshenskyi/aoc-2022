@@ -142,6 +142,21 @@ class Computer {
                 }
             }
         }
+
+        VectorPipe<uint64_t> dir_sizes() {
+            std::vector<uint64_t> sizes;
+            uint64_t root_size = 0;
+            for(auto& child: this->_fs.root.children) {
+                if(child.type == FileType::File) root_size += this->size_of_file(child);
+                else if(child.type == FileType::Dir) {
+                    uint64_t dir_size = this->size_of_dir(child, sizes);
+                    root_size += dir_size;
+                    sizes.push_back(dir_size);
+                }
+            }
+            sizes.push_back(root_size);
+            return VectorPipe{sizes};
+        }
     private:
         FileSystem _fs;
 
@@ -155,12 +170,45 @@ class Computer {
                 throw std::logic_error("Computer::execute_command(): UNKNOWN COMMAND");
             }
         }
+
+        uint64_t size_of_file(FileNode& file) {
+            if(file.type != FileType::File) {
+                std::string err = "ERROR: Computer::size_of_file() got a FileNode that's not a file!";
+                std::cout << err << std::endl;
+                throw err;
+            }
+
+            return file.size;
+        }
+
+        uint64_t size_of_dir(FileNode& dir, std::vector<uint64_t>& sizes) {
+            if(dir.type != FileType::Dir) {
+                std::string err = "ERROR: Computer::size_of_dir() got a FileNode that's not a dir!";
+                std::cout << err << std::endl;
+                throw err;
+            }
+
+            uint64_t the_size = 0;
+            for(auto& node: dir.children) {
+                if(node.type == FileType::File) the_size += this->size_of_file(node);
+                else if(node.type == FileType::Dir) {
+                    uint64_t dir_size = this->size_of_dir(node, sizes);
+                    the_size += dir_size;
+                    sizes.push_back(dir_size);
+                }
+            }
+            
+            return the_size;
+        }
 };
 
 
 uint64_t part_one(VectorPipe<std::string>& input) {
-    (void) Computer(input);
-    return 2;
+    auto sizes {Computer(input)
+        .dir_sizes()};
+    return sizes
+        .filter([](auto x) { return x <= 100000; })
+        .sum();
 }
 
 uint64_t part_two(VectorPipe<std::string>& input) {

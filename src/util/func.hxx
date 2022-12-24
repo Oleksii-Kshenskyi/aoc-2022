@@ -56,6 +56,12 @@ namespace util {
                 size_t end_offset = this->_vec.size() - end - 1;
                 return VectorPipe<T>(std::vector<T>(this->_vec.begin() + begin, this->_vec.end() - end_offset));
             }
+            template<typename Predicate>
+            VectorPipe<T> filter(Predicate p) {
+                std::vector<T> filtered;
+                std::copy_if(this->_vec.begin(), this->_vec.end(), std::back_inserter(filtered), p);
+                return VectorPipe<T>{filtered};
+            }
             VectorPipe<VectorPipe<T>> partition(size_t part_size) {
                 VectorPipe<VectorPipe<T>> result;
 
